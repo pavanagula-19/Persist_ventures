@@ -1,1 +1,1 @@
-web: java -jar target/app.jar
+web: java -jar target/ai-gif-backend-0.0.1-SNAPSHOT.jar 
