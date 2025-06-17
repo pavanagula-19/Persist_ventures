@@ -1,24 +1,30 @@
+# Use Eclipse Temurin JDK 17 as the base image for Spring Boot
 FROM eclipse-temurin:17-jdk
 
-# Install ffmpeg and python3
+# Install ffmpeg, Python 3, pip, and venv support
 RUN apt-get update && \
-    apt-get install -y ffmpeg python3 python3-pip && \
+    apt-get install -y ffmpeg python3 python3-pip python3-venv && \
     apt-get clean
 
-# Copy Spring Boot JAR (adjust name if different)
+# Create a Python virtual environment to avoid breaking system packages
+RUN python3 -m venv /venv
+ENV PATH="/venv/bin:$PATH"
+
+# Upgrade pip and install Python dependencies inside venv
+RUN pip install --upgrade pip && \
+    pip install openai-whisper sentence-transformers torch
+
+# Set the working directory
+WORKDIR /app
+
+# Copy Spring Boot JAR (update filename if needed)
 COPY target/server_ai_gif-0.0.1-SNAPSHOT.jar app.jar
 
-# Copy Python scripts (if any)
+# Copy any Python scripts (optional, only if you use them in backend)
 COPY scripts/ /scripts/
 
-# Install Python dependencies
-RUN pip3 install openai-whisper sentence-transformers torch
-
-# Set working directory
-WORKDIR /
-
-# Expose port 8080
+# Expose port 8080 (default Spring Boot port)
 EXPOSE 8080
 
-# Run the Spring Boot JAR
+# Start the Spring Boot application
 ENTRYPOINT ["java", "-jar", "app.jar"]
