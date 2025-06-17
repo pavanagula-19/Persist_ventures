@@ -107,5 +107,6 @@ Deploy to cloud (Render for backend, Vercel for frontend)
 
 👨‍💻 Author
 Built with ❤️ by Pavan Agulla
+
 Stack: Java, Python, React, PostgreSQL, FFmpeg, OpenAI Whisper
 
