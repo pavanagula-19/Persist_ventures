@@ -21,18 +21,24 @@ export default function UploadForm() {
   const [gifPaths, setGifPaths] = useState<string[]>([]);
 
   const handleGenerateGifs = async () => {
-    if (clipPaths.length === 0 || matchedCaptions.length === 0) return;
+    if (clipPaths.length === 0 || matchedCaptions.length === 0) {
+      setMessage("⚠️ No clips or captions to process.");
+      return;
+    }
+
     setMessage("🖼️ Generating GIFs...");
+    setLoading(true);
+
     try {
-      setLoading(true);
-      const generateRes = await api.post("/videos/generate-gifs", {
+      const response = await api.post("/videos/generate-gifs", {
         clips: clipPaths.map((path) => path.split("/").pop()),
-        captions: matchedCaptions.map((c) => c.text),
+        captions: matchedCaptions.map((caption) => caption.text),
       });
-      setGifPaths(generateRes.data.gifs);
+
+      setGifPaths(response.data.gifs);
       setMessage("✅ GIFs created!");
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error("GIF generation error:", error);
       setMessage("❌ GIF generation failed.");
     } finally {
       setLoading(false);
