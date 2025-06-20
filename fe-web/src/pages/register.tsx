@@ -1,6 +1,7 @@
 import { Box } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../api";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -17,29 +18,18 @@ export default function Register() {
     e.preventDefault();
 
     try {
-      const response = await fetch(
-        "https://ai-gif-backend.onrender.com/auth/register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(form),
-        }
-      );
+      const response = await api.post("/auth/register", form);
 
-      const data = await response.text();
-
-      if (response.ok) {
+      if (response.status === 200) {
         alert("✅ Registration successful!");
         setForm({ username: "", password: "" });
         navigate("/login");
-      } else {
-        alert("❌ Registration failed: " + data);
       }
-    } catch (error) {
-      console.error("❌ Network or server error:", error);
-      alert("❌ Something went wrong!");
+    } catch (err: any) {
+      const msg =
+        err.response?.data?.message || "Registration failed. Try again.";
+      alert("❌ " + msg);
+      console.error("Registration error:", err);
     }
   };
 
