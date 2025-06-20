@@ -9,11 +9,13 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**") // allow all endpoints
-                .allowedOrigins("http://localhost:5173","https://persistventuresaigif.netlify.app") // React dev server
+        registry.addMapping("/**")
+                .allowedOriginPatterns("*") // ✅ More flexible than allowedOrigins()
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowedHeaders("*");
+                .allowedHeaders("*")
+                .allowCredentials(true); // Optional: if using cookies or Authorization header
     }
+
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
