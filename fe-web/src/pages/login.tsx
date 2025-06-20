@@ -1,6 +1,7 @@
 import { Box } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../api";
 
 interface LoginProps {
   setIsAuthenticated: (v: boolean) => void;
@@ -18,31 +19,21 @@ export default function LoginPage({ setIsAuthenticated }: LoginProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
     try {
-      const response = await fetch(
-        "https://ai-gif-backend.onrender.com/auth/login",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(form),
-        }
-      );
+      const response = await api.post("/auth/login", form);
 
-      const contentType = response.headers.get("content-type");
-      const isJson = contentType && contentType.includes("application/json");
-      const data = isJson ? await response.json() : await response.text();
+      const { token, username } = response.data;
 
-      if (response.ok) {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("username", data.username);
-        setIsAuthenticated(true);
-        navigate("/");
-      } else {
-        alert("Login failed: " + (isJson ? data.message : data));
-      }
-    } catch (err) {
-      alert("Network error");
-      console.error(err);
+      localStorage.setItem("token", token);
+      localStorage.setItem("username", username);
+      setIsAuthenticated(true);
+      navigate("/");
+    } catch (err: any) {
+      const errorMessage =
+        err.response?.data?.message || "Invalid username or password";
+      alert("Login failed: " + errorMessage);
+      console.error("Login error:", err);
     } finally {
       setIsLoading(false);
     }
