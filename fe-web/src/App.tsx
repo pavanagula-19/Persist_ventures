@@ -1,17 +1,62 @@
-import { UploadCloud } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import Home from "./pages/Home";
+import LoginPage from "./pages/login";
+import Register from "./pages/register";
+import Header from "./pages/header";
+
+function DashboardLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-screen w-full flex bg-gradient-to-br from-blue-100 to-purple-200 font-sans">
+      <div className="flex flex-col flex-1">
+        <Header />
+        <main className="p-6">{children}</main>
+      </div>
+    </div>
+  );
+}
 
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
+    !!localStorage.getItem("token")
+  );
+
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isAuthenticated && location.pathname === "/") {
+      navigate("/login");
+    }
+  }, [isAuthenticated, location.pathname]);
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setIsAuthenticated(!!localStorage.getItem("token"));
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-gray-100 font-sans">
-      <header className="bg-white shadow-md px-6 py-4 flex items-center justify-between">
-        <h1 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-          <UploadCloud className="text-blue-500" /> Video to GIF Generator
-        </h1>
-      </header>
-      <main className="p-6">
-        <Home />
-      </main>
-    </div>
+    <Routes>
+      <Route
+        path="/"
+        element={
+          isAuthenticated ? (
+            <DashboardLayout>
+              <Home />
+            </DashboardLayout>
+          ) : (
+            <LoginPage setIsAuthenticated={setIsAuthenticated} />
+          )
+        }
+      />
+      <Route
+        path="/login"
+        element={<LoginPage setIsAuthenticated={setIsAuthenticated} />}
+      />
+      <Route path="/register" element={<Register />} />
+    </Routes>
   );
 }
